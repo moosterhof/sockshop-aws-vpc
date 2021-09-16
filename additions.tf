@@ -1,7 +1,7 @@
 
 resource "aws_subnet" "sock1" {
-  vpc_id     = aws_vpc.peer.id
-  cidr_block = "172.31.1.0/24"
+  vpc_id            = aws_vpc.peer.id
+  cidr_block        = "172.31.1.0/24"
   availability_zone = "us-west-2a"
 
   tags = {
@@ -10,8 +10,8 @@ resource "aws_subnet" "sock1" {
 }
 
 resource "aws_subnet" "socks2" {
-  vpc_id     = aws_vpc.peer.id
-  cidr_block = "172.31.2.0/24"
+  vpc_id            = aws_vpc.peer.id
+  cidr_block        = "172.31.2.0/24"
   availability_zone = "us-west-2b"
 
   tags = {
@@ -20,8 +20,8 @@ resource "aws_subnet" "socks2" {
 }
 
 resource "aws_subnet" "socks3" {
-  vpc_id     = aws_vpc.peer.id
-  cidr_block = "172.31.3.0/24"
+  vpc_id            = aws_vpc.peer.id
+  cidr_block        = "172.31.3.0/24"
   availability_zone = "us-west-2c"
 
   tags = {
@@ -37,22 +37,8 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
+
 /*
-resource "aws_route_table" "rt1" {
-  vpc_id = aws_vpc.peer.id
-
-  route = [
-    {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.gw.id
-    }
-  ]
-
-  tags = {
-    Name = "sockshop"
-  }
-}
-
 resource "aws_security_group" "sockshop-ec2" {
   name        = "allow_ssh"
   description = "Allow SSH inbound traffic"
@@ -84,3 +70,34 @@ resource "aws_security_group" "sockshop-ec2" {
   }
 }
 */
+
+resource "aws_route_table" "sockshop" {
+  vpc_id = aws_vpc.peer.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+  route {
+    cidr_block = "172.25.16.0/20"
+    gateway_id = aws_vpc.peer.id
+  }
+  tags = {
+    Name = "sockshop"
+  }
+}
+
+resource "aws_route_table_association" "socks1" {
+  subnet_id      = aws_subnet.sock1.id
+  route_table_id = aws_route_table.sockshop.id
+}
+
+resource "aws_route_table_association" "socks2" {
+  subnet_id      = aws_subnet.socks2.id
+  route_table_id = aws_route_table.sockshop.id
+}
+
+resource "aws_route_table_association" "socks3" {
+  subnet_id      = aws_subnet.socks3.id
+  route_table_id = aws_route_table.sockshop.id
+}
+
