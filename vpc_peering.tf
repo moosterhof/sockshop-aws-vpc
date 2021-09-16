@@ -1,5 +1,14 @@
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = {
+      Environment = "Test"
+      Owner       = "moosterhof"
+      Project     = "sockshop"
+      ttl         = "1w"
+      Terraform   = "yes"
+    }
+  }
 }
 
 resource "aws_vpc" "peer" {
